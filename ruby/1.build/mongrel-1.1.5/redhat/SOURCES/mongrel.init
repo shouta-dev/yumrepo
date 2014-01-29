@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# chkconfig: - 90 10
+# description: A small fast HTTP server written in (mostly) Ruby.
+# processname: mongrel_rails
+# config: /etc/mongrel/mongrel.conf
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+RETVAL=0
+prog="mongrel_rubricks"
+
+MONGREL_PROG="/usr/bin/mongrel_rails"
+MONGREL_CONF="/etc/mongrel/mongrel.conf"
+
+if ! [ -x $MONGREL_PROG ]; then
+  echo $MONGREL_PROG is not executable.
+  exit 1
+fi
+if ! [ -e $MONGREL_CONF ]; then
+  echo $MONGREL_CONF does not exist.
+  exit 1
+fi
+
+start() {
+  if [ -e /var/lock/subsys/$prog ]; then
+    echo "now $prog running!"
+    echo "if $prog is not running, remove \"/var/lock/subsys/$prog\""
+    exit 1
+  fi
+
+  echo -n $"Starting $prog:"
+  $MONGREL_PROG cluster::start -C $MONGREL_CONF > /dev/null 2>&1
+  RETVAL=$?
+  if [ $RETVAL -eq 0 ]; then
+    daemon true
+    touch /var/lock/subsys/$prog
+  else
+    daemon false
+  fi
+  echo
+}
+
+stop() {
+  echo -n $"Stopping $prog: "
+  $MONGREL_PROG cluster::stop -C $MONGREL_CONF > /dev/null 2>&1
+  RETVAL=$?
+  if [ $RETVAL -eq 0 ]; then
+    daemon true
+    rm -f /var/lock/subsys/$prog
+  else
+    daemon false
+  fi
+  echo
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart}"
+    RETVAL=1
+esac
+exit $RETVAL

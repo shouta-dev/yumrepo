@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# chkconfig: - 95 5
+# description: repcached is memcached which implemented multi master asynchronous replication feature.
+#
+# processname: memcached
+# config: /etc/sysconfig/memcached
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+MEMCACHED_CONF="/etc/memcached.conf"
+
+RETVAL=0
+prog="memcached"
+
+if [ -e $MEMCACHED_CONF ]; then
+  source "$MEMCACHED_CONF"
+else
+  echo $MEMCACHED_CONF does not exist.
+  exit 1
+fi
+
+start() {
+  if [ -e /var/lock/subsys/$prog ]; then
+    echo "now $prog running!"
+    echo "if $prog is not running, remove \"/var/lock/subsys/$prog\""
+    exit 1
+  fi
+  echo -n $"Starting $prog:"
+  daemon $prog -d -p $PORT -u $USER -c $MAXCONN -m $CACHESIZE $OPTIONS
+  RETVAL=$?
+  if [ $RETVAL -eq 0 ]; then
+    daemon true
+    touch /var/lock/subsys/$prog
+  else
+    daemon false
+  fi
+  echo
+}
+
+stop() {
+  echo -n $"Stopping $prog: "
+  killproc $prog
+  RETVAL=$?
+  RETVAL=$?
+  if [ $RETVAL -eq 0 ]; then
+    daemon true
+    rm -f /var/lock/subsys/$prog
+  else
+    daemon false
+  fi
+  echo
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  status)
+    status $prog
+    RETVAL=$?
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart|status}"
+    RETVAL=1
+esac
+exit $RETVAL

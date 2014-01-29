@@ -1,0 +1,27 @@
+diff -Naur httpd-2.2.13.orig/modules/proxy/mod_proxy.c httpd-2.2.13/modules/proxy/mod_proxy.c
+--- httpd-2.2.13.orig/modules/proxy/mod_proxy.c 2009-02-01 05:58:07.000000000 +0900
++++ httpd-2.2.13/modules/proxy/mod_proxy.c      2009-08-31 18:30:23.000000000 +0900
+@@ -1005,6 +1005,11 @@
+             if (balancer) {
+                 worker->s->status |= PROXY_WORKER_IN_ERROR;
+                 worker->s->error_time = apr_time_now();
++                /* Busyness counter should be reset
++                 * when the worker is down.
++                 */
++                if (worker->s->busy)
++                    worker->s->busy = 0;
+             }
+             break;
+         }
+@@ -1016,6 +1021,11 @@
+             if (balancer) {
+                 worker->s->status |= PROXY_WORKER_IN_ERROR;
+                 worker->s->error_time = apr_time_now();
++                /* Busyness counter should be reset
++                 * when the worker is down.
++                 */
++                if (worker->s->busy)
++                    worker->s->busy = 0;
+             }
+         }
+         else {

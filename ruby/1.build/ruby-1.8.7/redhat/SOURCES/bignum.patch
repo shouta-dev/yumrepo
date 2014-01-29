@@ -1,0 +1,13 @@
+diff -Naur ruby-1.8.7-p72_orig/bignum.c ruby-1.8.7-p72/bignum.c
+--- ruby-1.8.7-p72_orig/bignum.c        2009-02-04 09:41:55.000000000 +0000
++++ ruby-1.8.7-p72/bignum.c             2009-02-04 09:42:37.000000000 +0000
+@@ -914,6 +914,9 @@
+     if (isnan(d)) {
+        rb_raise(rb_eFloatDomainError, "NaN");
+     }
++    if ((long)u == 0) {
++        return INT2FIX(0);
++    }
+
+     while (!POSFIXABLE(u) || 0 != (long)u) {
+        u /= (double)(BIGRAD);

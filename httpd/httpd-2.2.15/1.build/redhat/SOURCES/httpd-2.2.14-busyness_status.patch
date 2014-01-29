@@ -1,0 +1,19 @@
+diff -ur httpd-2.2.11.orig/modules/proxy/mod_proxy_balancer.c httpd-2.2.11/modules/proxy/mod_proxy_balancer.c
+--- httpd-2.2.11.orig/modules/proxy/mod_proxy_balancer.c	2008-11-15 15:16:23.000000000 +0100
++++ httpd-2.2.11/modules/proxy/mod_proxy_balancer.c	2009-04-21 15:10:06.000000000 +0200
+@@ -830,6 +831,7 @@
+                 "<th>Worker URL</th>"
+                 "<th>Route</th><th>RouteRedir</th>"
+                 "<th>Factor</th><th>Set</th><th>Status</th>"
++                "<th>Busyness</th>"
+                 "<th>Elected</th><th>To</th><th>From</th>"
+                 "</tr>\n", r);
+ 
+@@ -861,6 +863,7 @@
+                 if (!PROXY_WORKER_IS_INITIALIZED(worker))
+                     ap_rputs("-", r);
+                 ap_rputs("</td>", r);
++                ap_rprintf(r, "<td>%" APR_SIZE_T_FMT "</td>", (apr_size_t)worker->s->busy);
+                 ap_rprintf(r, "<td>%" APR_SIZE_T_FMT "</td><td>", worker->s->elected);
+                 ap_rputs(apr_strfsize(worker->s->transferred, fbuf), r);
+                 ap_rputs("</td><td>", r);
